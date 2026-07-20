@@ -293,16 +293,40 @@ async function apiPost(action, payload){
   DB = json.data;
   return json.result;
 }
+function loadCachedDB(){
+  try{
+    const cached = sessionStorage.getItem('barkDB');
+    if(cached) return JSON.parse(cached);
+  }catch(e){}
+  return null;
+}
+function cacheDB(){
+  try{ sessionStorage.setItem('barkDB', JSON.stringify(DB)); }catch(e){}
+}
 async function refreshData(showLoader){
   const overlay = document.getElementById('loadOverlay');
   if(showLoader && overlay) overlay.style.display='flex';
   try{
     DB = await apiGet();
+    cacheDB();
   }catch(e){
     toast('Could not load data — check API_URL in common.js', true);
   }
   if(overlay) overlay.style.display='none';
   if(typeof renderPage === 'function') renderPage();
+}
+// On first load in a tab, fetch fresh with the full spinner. On later page
+// navigations within the same session, render instantly from cache, then
+// quietly re-sync with the server in the background (no spinner flash).
+function initPage(){
+  const cached = loadCachedDB();
+  if(cached){
+    DB = cached;
+    if(typeof renderPage === 'function') renderPage();
+    refreshData(false);
+  } else {
+    refreshData(true);
+  }
 }
 
 /* ---------------- FORMAT / MISC HELPERS ---------------- */
@@ -858,7 +882,7 @@ function renderPage(){
 }
 
 
-refreshData(true);
+initPage();
 </script>
 </body>
 </html>
