@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bark Ornament — Dashboard</title>
+<style>
+:root{
+  --navy:#0f2545;
+  --navy-dark:#0a1b34;
+  --navy-light:#17335c;
+  --orange:#e0872f;
+  --orange-dark:#c5701f;
+  --bg:#f4f6fa;
+  --card:#ffffff;
+  --border:#e2e6ee;
+  --text:#1c2836;
+  --text-soft:#66748c;
+  --green:#1e9e6b;
+  --green-bg:#e7f7f0;
+  --red:#d64545;
+  --red-bg:#fdecec;
+  --radius:10px;
+  --shadow:0 1px 3px rgba(16,28,50,.08), 0 1px 2px rgba(16,28,50,.06);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;height:100%;}
+body{
+  font-family:'Segoe UI',Roboto,-apple-system,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  display:flex;
+  min-height:100vh;
+}
+/* ---------- SIDEBAR ---------- */
+#sidebar{
+  width:220px;
+  background:linear-gradient(180deg,var(--navy) 0%, var(--navy-dark) 100%);
+  color:#fff;
+  display:flex;
+  flex-direction:column;
+  flex-shrink:0;
+  position:sticky;
+  top:0;
+  height:100vh;
+}
+#sidebar .brand{
+  padding:22px 20px 16px 20px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+#sidebar .brand .logo{
+  font-size:20px;
+  font-weight:700;
+  letter-spacing:.5px;
+  color:#fff;
+}
+#sidebar .brand .logo span{color:var(--orange);}
+#sidebar .brand .sub{font-size:11px;color:#9fb0c9;margin-top:2px;}
+#sidebar nav{flex:1;padding:14px 10px;}
+#sidebar nav a{
+  display:flex;align-items:center;gap:10px;
+  padding:11px 14px;margin-bottom:3px;
+  border-radius:8px;color:#c6d2e6;text-decoration:none;
+  font-size:14px;cursor:pointer;transition:.15s;
+}
+#sidebar nav a:hover{background:rgba(255,255,255,.06);color:#fff;}
+#sidebar nav a.active{background:var(--orange);color:#fff;font-weight:600;}
+#sidebar .foot{padding:14px 20px;font-size:11px;color:#7488a3;border-top:1px solid rgba(255,255,255,.08);}
+
+/* ---------- MAIN ---------- */
+#main{flex:1;min-width:0;display:flex;flex-direction:column;}
+#topbar{
+  background:var(--card);border-bottom:1px solid var(--border);
+  padding:16px 28px;display:flex;justify-content:space-between;align-items:center;
+  position:sticky;top:0;z-index:20;
+}
+#topbar h1{font-size:19px;margin:0;font-weight:700;}
+#topbar .crumbs{font-size:12px;color:var(--text-soft);margin-top:2px;}
+#content{padding:24px 28px;flex:1;}
+
+/* ---------- CARDS / GRID ---------- */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:22px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);}
+.card .label{font-size:12px;color:var(--text-soft);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;}
+.card .value{font-size:22px;font-weight:700;color:var(--navy);}
+.card .value.orange{color:var(--orange-dark);}
+.card .sub{font-size:12px;margin-top:4px;color:var(--text-soft);}
+
+.panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:20px;overflow:hidden;}
+.panel-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+.panel-head h2{font-size:15px;margin:0;font-weight:700;}
+.panel-body{padding:18px;}
+
+/* ---------- TABLE ---------- */
+.tbl-wrap{overflow:auto;max-width:100%;}
+table.data{border-collapse:collapse;width:100%;font-size:13px;min-width:600px;}
+table.data th{
+  background:#f7f9fc;color:var(--text-soft);text-transform:uppercase;font-size:11px;
+  letter-spacing:.3px;text-align:left;padding:10px 12px;border-bottom:2px solid var(--border);white-space:nowrap;
+}
+table.data td{padding:9px 12px;border-bottom:1px solid var(--border);white-space:nowrap;}
+table.data tbody tr:hover{background:#fafbfd;}
+table.data td.num, table.data th.num{text-align:right;}
+table.data .sticky-action{position:sticky;right:0;background:#fff;box-shadow:-4px 0 6px -4px rgba(0,0,0,.12);}
+table.data thead th.sticky-action{background:#f7f9fc;}
+table.data tfoot td{font-weight:700;background:#f7f9fc;border-top:2px solid var(--border);}
+
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;}
+.badge.profit{background:var(--green-bg);color:var(--green);}
+.badge.loss{background:var(--red-bg);color:var(--red);}
+
+/* ---------- BUTTONS / INPUTS ---------- */
+button, .btn{
+  font-family:inherit;font-size:13px;font-weight:600;border-radius:7px;border:1px solid transparent;
+  padding:8px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:.15s;
+}
+.btn-primary{background:var(--orange);color:#fff;}
+.btn-primary:hover{background:var(--orange-dark);}
+.btn-outline{background:#fff;border-color:var(--border);color:var(--navy);}
+.btn-outline:hover{border-color:var(--navy);}
+.btn-ghost{background:transparent;color:var(--text-soft);}
+.btn-ghost:hover{color:var(--navy);}
+.btn-danger{background:#fff;border-color:var(--red);color:var(--red);}
+.btn-danger:hover{background:var(--red-bg);}
+.btn-sm{padding:5px 9px;font-size:12px;}
+input,select,textarea{
+  font-family:inherit;font-size:13px;padding:8px 10px;border:1px solid var(--border);border-radius:7px;
+  width:100%;background:#fff;color:var(--text);
+}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--orange);}
+label{font-size:12px;font-weight:600;color:var(--text-soft);display:block;margin-bottom:5px;}
+.field{margin-bottom:12px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;}
+
+/* ---------- ITEM ROW GRID (invoice form) ---------- */
+.itemcol-wrap{overflow:auto;border:1px solid var(--border);border-radius:8px;max-width:100%;}
+table.itemcol{border-collapse:collapse;font-size:12.5px;}
+table.itemcol th, table.itemcol td{border-bottom:1px solid var(--border);border-right:1px solid var(--border);padding:7px 9px;white-space:nowrap;}
+table.itemcol th.rowlabel, table.itemcol td.rowlabel{
+  position:sticky;left:0;background:#f7f9fc;font-weight:700;color:var(--text-soft);
+  text-transform:uppercase;font-size:10.5px;letter-spacing:.3px;min-width:170px;z-index:3;border-right:2px solid var(--border);
+}
+table.itemcol td.totalcol, table.itemcol th.totalcol{background:#fdf1e4;font-weight:700;min-width:110px;color:var(--orange-dark);}
+table.itemcol th.itemcol-head{background:#fff;min-width:150px;vertical-align:top;padding:8px;}
+table.itemcol th.itemcol-head .colname{display:flex;gap:6px;align-items:center;}
+table.itemcol th.itemcol-head input{font-weight:700;padding:6px 7px;font-size:12.5px;}
+table.itemcol th.itemcol-head .rm{background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;flex-shrink:0;}
+table.itemcol td input, table.itemcol td select{width:130px;padding:6px 7px;font-size:12.5px;}
+table.itemcol tr.section-row td, table.itemcol tr.section-row th{background:var(--navy);color:#fff;font-weight:700;font-size:10.5px;text-transform:uppercase;position:sticky;left:auto;}
+table.itemcol tr.section-row td.rowlabel{background:var(--navy);color:#fff;}
+table.itemcol tr.calc-row td{color:var(--text-soft);}
+table.itemcol tr.net-row td{font-weight:700;color:var(--navy);}
+table.itemcol tr.net-row td.rowlabel{color:var(--navy);}
+.addcol-btn{padding:8px 14px;}
+
+.empty{padding:40px 20px;text-align:center;color:var(--text-soft);}
+.empty .big{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:6px;}
+
+/* ---------- MODAL ---------- */
+.modal-bg{position:fixed;inset:0;background:rgba(10,20,40,.5);display:none;align-items:flex-start;justify-content:center;z-index:100;overflow:auto;padding:30px 16px;}
+.modal-bg.show{display:flex;}
+.modal{background:#fff;border-radius:var(--radius);width:100%;max-width:920px;box-shadow:0 20px 50px rgba(0,0,0,.25);}
+.modal-head{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.modal-head h2{margin:0;font-size:16px;}
+.modal-body{padding:20px 22px;max-height:75vh;overflow:auto;}
+.modal-foot{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;}
+.close-x{background:none;border:none;font-size:20px;color:var(--text-soft);cursor:pointer;}
+
+.toast{position:fixed;bottom:22px;right:22px;background:var(--navy);color:#fff;padding:12px 18px;border-radius:8px;font-size:13px;box-shadow:var(--shadow);z-index:200;opacity:0;transform:translateY(8px);transition:.25s;}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast.err{background:var(--red);}
+
+.pill-tabs{display:flex;gap:6px;margin-bottom:16px;}
+.pill-tabs button{background:#f0f2f7;color:var(--text-soft);border:1px solid var(--border);}
+.pill-tabs button.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+
+.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+#loadOverlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;z-index:500;}
+#loadOverlay .spinner{width:28px;height:28px;border-color:rgba(15,37,69,.15);border-top-color:var(--navy);}
+
+/* ---------- PRINT / INVOICE TEMPLATE ---------- */
+#invoiceTemplate{display:none;}
+.inv-doc{width:760px;padding:30px;background:#fff;font-family:Arial,Helvetica,sans-serif;color:#111;font-size:12px;}
+.inv-doc h2.inv-title{text-align:center;font-size:15px;margin:0 0 16px 0;text-decoration:underline;}
+.inv-top{display:flex;justify-content:space-between;margin-bottom:16px;}
+.inv-box{border:1px solid #999;padding:10px;width:60%;font-size:11.5px;line-height:1.5;}
+.inv-meta{width:36%;font-size:11.5px;}
+.inv-meta div{border:1px solid #999;padding:6px 8px;margin-bottom:6px;}
+.inv-logo{font-weight:800;font-size:20px;color:var(--orange-dark);text-align:right;}
+table.inv-items{width:100%;border-collapse:collapse;margin-top:6px;}
+table.inv-items th{background:#eee;border:1px solid #999;padding:6px 8px;font-size:11px;text-align:left;}
+table.inv-items td{border:1px solid #999;padding:6px 8px;font-size:11px;}
+table.inv-items td.num{text-align:right;}
+.inv-total-row td{font-weight:700;background:#f5f5f5;}
+.inv-terms{margin-top:18px;font-size:11px;line-height:1.6;}
+.inv-sign{margin-top:40px;font-size:11.5px;}
+
+@media print{
+  body *{visibility:hidden;}
+  #printArea, #printArea *{visibility:visible;}
+  #printArea{position:absolute;top:0;left:0;width:100%;}
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media(max-width:900px){
+  #sidebar{position:fixed;left:-220px;transition:.2s;z-index:300;}
+  #sidebar.open{left:0;}
+  .grid2,.grid3,.grid4{grid-template-columns:1fr;}
+}
+#menuBtn{display:none;background:none;border:none;font-size:20px;color:var(--navy);cursor:pointer;}
+@media(max-width:900px){#menuBtn{display:inline-flex;}}
+
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<div id="loadOverlay"><div class="spinner"></div><div style="font-size:13px;color:var(--text-soft)">Loading data…</div></div>
+
+<div id="sidebar">
+  <div class="brand">
+    <div class="logo">Bark<span>Ornament</span></div>
+    <div class="sub">Shipment Profitability</div>
+  </div>
+  <nav id="navLinks">
+    <a href="index.html" class="active">Dashboard</a>
+    <a href="export.html" class="">Export Shipments</a>
+    <a href="local.html" class="">Local Sales</a>
+    <a href="supplier.html" class="">Suppliers</a>
+    <a href="settings.html" class="">Settings</a>
+  </nav>
+  <div class="foot">Bark Ornament (Pvt) Ltd<br>No. 59A, Bekkegama, Panadura</div>
+</div>
+
+<div id="main">
+  <div id="topbar">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button id="menuBtn" onclick="toggleSidebar()">MENU</button>
+      <div>
+        <h1 id="pageTitle">Dashboard</h1>
+        <div class="crumbs" id="pageCrumb">Overview of profitability</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn-outline" onclick="refreshData(true)">Refresh</button>
+    </div>
+  </div>
+  <div id="content"></div>
+</div>
+
+<div id="modalBg" class="modal-bg">
+  <div class="modal" id="modalBox"></div>
+</div>
+
+<div id="toast" class="toast"></div>
+<div id="printArea"></div>
+<div id="invoiceTemplate"></div>
+
+<script>
+/* =========================================================
+   Bark Ornament — Shipment Profitability
+   common.js — shared by every page (index / export / local /
+   supplier / settings). Each page only adds its own small
+   inline script that defines renderPage() and calls refreshData().
+   ========================================================= */
+
+/* =========================================================
+   CONFIG — paste your Apps Script Web App URL here
+   ========================================================= */
+const API_URL = "https://script.google.com/macros/s/AKfycbwZOUT4YW2GO4RdxPGhNTk7MkrWb2T8mH3N7eXH118LHma-1yTF59X9GWmZ7-1tZyjR/exec";
+
+let DB = { settings:{}, suppliers:[], exportInvoices:[], exportItems:[], localInvoices:[], localItems:[] };
+
+/* ---------------- API ---------------- */
+async function apiGet(){
+  const res = await fetch(API_URL + '?action=getAll');
+  const json = await res.json();
+  if(!json.success) throw new Error(json.error || 'Request failed');
+  return json.data;
+}
+async function apiPost(action, payload){
+  const res = await fetch(API_URL, {
+    method:'POST',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body: JSON.stringify({action, payload})
+  });
+  const json = await res.json();
+  if(!json.success) throw new Error(json.error || 'Request failed');
+  DB = json.data;
+  return json.result;
+}
+async function refreshData(showLoader){
+  const overlay = document.getElementById('loadOverlay');
+  if(showLoader && overlay) overlay.style.display='flex';
+  try{
+    DB = await apiGet();
+  }catch(e){
+    toast('Could not load data — check API_URL in common.js', true);
+  }
+  if(overlay) overlay.style.display='none';
+  if(typeof renderPage === 'function') renderPage();
+}
+
+/* ---------------- FORMAT / MISC HELPERS ---------------- */
+function pct(key){ return parseFloat(DB.settings[key] || 0); }
+function fmt(n, dp){ n = isFinite(n) ? n : 0; return Number(n).toLocaleString('en-US', {minimumFractionDigits:dp!=null?dp:2, maximumFractionDigits:dp!=null?dp:2}); }
+function fmtPct(n){ return (isFinite(n)? (n*100).toFixed(1):'0.0') + '%'; }
+function uid(){ return 'ID'+Date.now()+Math.floor(Math.random()*1000); }
+function fmtDate(d){
+  if(!d) return '';
+  const dt = new Date(d);
+  if(isNaN(dt)) return d;
+  return dt.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+}
+function toDateInput(d){
+  if(!d) return new Date().toISOString().slice(0,10);
+  const dt = new Date(d);
+  if(isNaN(dt)) return new Date().toISOString().slice(0,10);
+  return dt.toISOString().slice(0,10);
+}
+function toggleSidebar(){
+  const sb = document.getElementById('sidebar');
+  if(sb) sb.classList.toggle('open');
+}
+
+/* ---------------- COMPUTATION ----------------
+   Mirrors the formula chain derived from Bark Ornament's own
+   profitability sheets:
+   Revenue      = Qty * UnitPrice * ExchangeRate
+   TotalCost    = Qty * UnitCostLKR
+   Freight      = InvoiceFreightTotal * (ItemRevenue / SumInvoiceRevenue)
+   Contribution = Revenue - TotalCost - Freight
+   Labour       = Revenue * LabourPct
+   GrossProfit  = Contribution - Labour
+   Overhead     = Revenue * OverheadPct
+   Commission   = Revenue * CommissionPct
+   OD           = Revenue * ODPct
+   Bank         = Revenue * BankPct
+   NetProfit    = GrossProfit - Overhead - Commission - OD - Bank
+------------------------------------------------- */
+function computeInvoiceItems(items, exchangeRate, freightTotal, priceField){
+  const rows = items.map(it=>{
+    const qty = parseFloat(it.Qty)||0;
+    const price = parseFloat(it[priceField])||0;
+    const cost = parseFloat(it.UnitCostLKR)||0;
+    const revenue = qty * price * (exchangeRate||1);
+    const totalCost = qty * cost;
+    return {...it, qty, price, revenue, totalCost};
+  });
+  const sumRevenue = rows.reduce((s,r)=>s+r.revenue,0) || 1;
+  const labourPct = pct('LabourPct'), overheadPct = pct('OverheadPct'),
+        commissionPct = pct('CommissionPct'), odPct = pct('ODPct'), bankPct = pct('BankPct');
+
+  return rows.map(r=>{
+    const freight = (parseFloat(freightTotal)||0) * (r.revenue / sumRevenue);
+    const contribution = r.revenue - r.totalCost - freight;
+    const labour = r.revenue * labourPct;
+    const gross = contribution - labour;
+    const overhead = r.revenue * overheadPct;
+    const commission = r.revenue * commissionPct;
+    const od = r.revenue * odPct;
+    const bank = r.revenue * bankPct;
+    const net = gross - overhead - commission - od - bank;
+    return {
+      ...r, freight, contribution,
+      contributionPct: r.revenue? contribution/r.revenue:0,
+      labour, gross, grossPct: r.revenue? gross/r.revenue:0,
+      overhead, commission, od, bank, net,
+      netPct: r.revenue? net/r.revenue:0,
+      status: net>=0?'Profit':'Loss'
+    };
+  });
+}
+function sumField(rows, f){ return rows.reduce((s,r)=>s+(r[f]||0),0); }
+
+function computeExportInvoice(inv){
+  const items = DB.exportItems.filter(i=>i.InvoiceNo===inv.InvoiceNo);
+  const computed = computeInvoiceItems(items, parseFloat(inv.ExchangeRate)||1, inv.FreightTotal, 'UnitPrice');
+  return summarize(computed);
+}
+function computeLocalInvoice(inv){
+  const items = DB.localItems.filter(i=>i.InvoiceNo===inv.InvoiceNo);
+  const computed = computeInvoiceItems(items, 1, inv.DeliveryTotal, 'SellPriceLKR');
+  return summarize(computed);
+}
+function summarize(rows){
+  const revenue=sumField(rows,'revenue'), cost=sumField(rows,'totalCost'), freight=sumField(rows,'freight'),
+        gross=sumField(rows,'gross'), net=sumField(rows,'net');
+  return {items:rows, revenue, cost, freight, gross, net,
+    grossPct: revenue? gross/revenue:0, netPct: revenue? net/revenue:0,
+    status: net>=0?'Profit':'Loss'};
+}
+
+/* ---------------- MODAL / TOAST HELPERS ---------------- */
+function showModal(title, bodyHtml, buttons, wide){
+  const box = document.getElementById('modalBox');
+  box.style.maxWidth = wide ? '980px':'520px';
+  box.innerHTML = `
+    <div class="modal-head"><h2>${title}</h2><button class="close-x" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">${bodyHtml}</div>
+    <div class="modal-foot">${buttons.map((b,i)=>`<button class="${b.cls}" id="modalBtn${i}">${b.label}</button>`).join('')}</div>
+  `;
+  buttons.forEach((b,i)=> document.getElementById('modalBtn'+i).onclick = b.onclick );
+  document.getElementById('modalBg').classList.add('show');
+}
+function closeModal(){ document.getElementById('modalBg').classList.remove('show'); }
+document.addEventListener('DOMContentLoaded', ()=>{
+  const bg = document.getElementById('modalBg');
+  if(bg) bg.addEventListener('click', e=>{ if(e.target.id==='modalBg') closeModal(); });
+});
+
+function toast(msg, isErr){
+  const t = document.getElementById('toast');
+  if(!t) return;
+  t.textContent = msg;
+  t.className = 'toast show' + (isErr?' err':'');
+  setTimeout(()=> t.classList.remove('show'), 3200);
+}
+
+/* ================= INVOICE MODAL (shared: Export + Local) ================= */
+let modalItems = [];
+let modalType = 'export';
+let modalInvoiceNo = null;
+
+function openInvoiceModal(type, invoiceNo){
+  modalType = type;
+  modalInvoiceNo = invoiceNo || null;
+  const isExport = type==='export';
+  let inv = {};
+  if(invoiceNo){
+    inv = (isExport?DB.exportInvoices:DB.localInvoices).find(i=>i.InvoiceNo===invoiceNo) || {};
+    modalItems = (isExport?DB.exportItems:DB.localItems).filter(i=>i.InvoiceNo===invoiceNo).map(i=>({...i}));
+  } else {
+    inv = { Date: new Date().toISOString().slice(0,10), Currency: DB.settings.DefaultCurrency||'USD', ExchangeRate: DB.settings.DefaultExchangeRate||335 };
+    modalItems = [];
+  }
+
+  const headerFieldsExport = `
+    <div class="grid3">
+      <div class="field"><label>Invoice No</label><input id="invNo" value="${inv.InvoiceNo||''}" ${invoiceNo?'readonly':''}></div>
+      <div class="field"><label>Date</label><input id="invDate" type="date" value="${toDateInput(inv.Date)}"></div>
+      <div class="field"><label>Country</label>
+        <select id="invCountry">
+          ${['Maldives','Seychelles','Other'].map(c=>`<option ${inv.Country===c?'selected':''}>${c}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>Consignee</label><input id="invConsignee" value="${inv.Consignee||''}"></div>
+      <div class="field"><label>Address</label><input id="invAddress" value="${inv.Address||''}"></div>
+    </div>
+    <div class="grid4">
+      <div class="field"><label>Shipment Mode</label><input id="invMode" value="${inv.ShipmentMode||'Air Shipment'}"></div>
+      <div class="field"><label>Currency</label><input id="invCurrency" value="${inv.Currency||'USD'}"></div>
+      <div class="field"><label>Exchange Rate (→LKR)</label><input id="invRate" type="number" step="0.01" value="${inv.ExchangeRate||DB.settings.DefaultExchangeRate||335}"></div>
+      <div class="field"><label>Freight Total (LKR, manual)</label><input id="invFreight" type="number" step="0.01" value="${inv.FreightTotal||0}"></div>
+    </div>
+    <div class="field"><label>Vat Reg No</label><input id="invVat" value="${inv.VatRegNo||''}"></div>
+  `;
+
+  const headerFieldsLocal = `
+    <div class="grid3">
+      <div class="field"><label>Invoice No</label><input id="invNo" value="${inv.InvoiceNo||''}" ${invoiceNo?'readonly':''}></div>
+      <div class="field"><label>Date</label><input id="invDate" type="date" value="${toDateInput(inv.Date)}"></div>
+      <div class="field"><label>Customer</label><input id="invConsignee" value="${inv.Customer||''}"></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>Delivery / Shipment Cost (LKR, manual)</label><input id="invFreight" type="number" step="0.01" value="${inv.DeliveryTotal||0}"></div>
+      <div class="field"><label>Notes</label><input id="invVat" value="${inv.Notes||''}"></div>
+    </div>
+  `;
+
+  const body = `
+    ${isExport?headerFieldsExport:headerFieldsLocal}
+    <hr style="border:none;border-top:1px solid var(--border);margin:16px 0;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <label style="margin:0">Items (laid out across, like your shipment sheet)</label>
+    </div>
+    <div id="itemColWrap"></div>
+    <div id="modalSummary" style="margin-top:14px;padding:12px;background:#f7f9fc;border-radius:8px;font-size:13px;"></div>
+  `;
+
+  showModal((invoiceNo?'Edit':'New') + ' ' + (isExport?'Export Shipment':'Local Sale'), body, [
+    {label:'Cancel', cls:'btn-ghost', onclick:closeModal},
+    {label: invoiceNo?'Save Changes':'Create', cls:'btn-primary', onclick: saveInvoice}
+  ], true);
+
+  renderItemColumns();
+}
+
+function addItemRow(){
+  modalItems.push({ID:uid(), InvoiceNo: modalInvoiceNo||'', ItemDescription:'', Size:'', Unit:'Pcs', Supplier:'', Qty:0, UnitPrice:0, SellPriceLKR:0, UnitCostLKR:0});
+  renderItemColumns();
+}
+function removeItemRow(idx){ modalItems.splice(idx,1); renderItemColumns(); }
+
+// Items laid out across as columns (Item / Supplier / Qty / Rate / Cost as rows,
+// one column per item, plus a Total column) — mirrors the wide shipment sheet.
+function renderItemColumns(){
+  const isExport = modalType==='export';
+  const priceField = isExport ? 'UnitPrice' : 'SellPriceLKR';
+  const rate = isExport ? (parseFloat(document.getElementById('invRate')?.value)||1) : 1;
+  const freight = parseFloat(document.getElementById('invFreight')?.value)||0;
+  const computed = computeInvoiceItems(modalItems, rate, freight, priceField);
+  const s = summarize(computed);
+  const wrap = document.getElementById('itemColWrap');
+  if(!wrap) return;
+
+  const priceLabel = isExport ? ('Rate (' + (document.getElementById('invCurrency')?.value || 'USD') + ')') : 'Sell Price (LKR)';
+
+  function row(label, cellFn, opts){
+    opts = opts || {};
+    const cells = modalItems.map((it,idx)=>`<td>${cellFn(it,idx)}</td>`).join('');
+    return `<tr class="${opts.cls||''}"><td class="rowlabel">${label}</td><td class="totalcol">${opts.total!=null?opts.total:''}</td>${cells}</tr>`;
+  }
+  function sectionRow(label){
+    return `<tr class="section-row"><td class="rowlabel">${label}</td><td class="totalcol"></td>${modalItems.map(()=>`<td></td>`).join('')}</tr>`;
+  }
+
+  const headCells = modalItems.map((it,idx)=>`
+    <th class="itemcol-head">
+      <div class="colname">
+        <input value="${it.ItemDescription||''}" placeholder="Item name" oninput="modalItems[${idx}].ItemDescription=this.value">
+        <button class="rm" onclick="removeItemRow(${idx})" title="Remove item">✕</button>
+      </div>
+    </th>`).join('');
+
+  const html = `
+  <div class="itemcol-wrap">
+  <table class="itemcol">
+    <thead>
+      <tr>
+        <th class="rowlabel">Item</th>
+        <th class="totalcol">Total</th>
+        ${headCells}
+        <th style="background:#fff;"><button class="btn-outline btn-sm addcol-btn" onclick="addItemRow()">+ Item</button></th>
+      </tr>
+    </thead>
+    <tbody>
+      ${row('Supplier', (it,idx)=>`
+        <select onchange="modalItems[${idx}].Supplier=this.value">
+          <option value="">—</option>
+          ${DB.suppliers.map(sup=>`<option ${it.Supplier===sup.Name?'selected':''}>${sup.Name}</option>`).join('')}
+        </select>`)}
+      ${row('Qty', (it,idx)=>`<input type="number" step="0.01" value="${it.Qty||0}" oninput="modalItems[${idx}].Qty=this.value; renderItemColumns();">`, {total: fmt(sumField(computed,'qty'),0)})}
+      ${row(priceLabel, (it,idx)=>`<input type="number" step="0.0001" value="${it[priceField]||0}" oninput="modalItems[${idx}].${priceField}=this.value; renderItemColumns();">`)}
+      ${row('Unit Cost (LKR)', (it,idx)=>`<input type="number" step="0.01" value="${it.UnitCostLKR||0}" oninput="modalItems[${idx}].UnitCostLKR=this.value; renderItemColumns();">`)}
+
+      ${sectionRow('Value')}
+      ${row('Revenue (LKR)', (it,idx)=>fmt(computed[idx].revenue,0), {cls:'calc-row', total: fmt(s.revenue,0)})}
+      ${row('Total Cost (LKR)', (it,idx)=>fmt(computed[idx].totalCost,0), {cls:'calc-row', total: fmt(s.cost,0)})}
+      ${row('Gross Profit (before op. exp.)', (it,idx)=>fmt(computed[idx].revenue-computed[idx].totalCost,0), {cls:'calc-row', total: fmt(s.revenue-s.cost,0)})}
+
+      ${sectionRow('Shipment & Labour')}
+      ${row('Freight Allocated', (it,idx)=>fmt(computed[idx].freight,0), {cls:'calc-row', total: fmt(s.freight,0)})}
+      ${row('Labour Fee (' + fmtPct(pct('LabourPct')) + ')', (it,idx)=>fmt(computed[idx].labour,0), {cls:'calc-row', total: fmt(sumField(computed,'labour'),0)})}
+      ${row('Gross Profit', (it,idx)=>fmt(computed[idx].gross,0), {cls:'calc-row', total: fmt(s.gross,0)})}
+
+      ${sectionRow('Other & Financial Expenses')}
+      ${row('Overhead (' + fmtPct(pct('OverheadPct')) + ')', (it,idx)=>fmt(computed[idx].overhead,0), {cls:'calc-row', total: fmt(sumField(computed,'overhead'),0)})}
+      ${row('Commission (' + fmtPct(pct('CommissionPct')) + ')', (it,idx)=>fmt(computed[idx].commission,0), {cls:'calc-row', total: fmt(sumField(computed,'commission'),0)})}
+      ${row('OD Interest (' + fmtPct(pct('ODPct')) + ')', (it,idx)=>fmt(computed[idx].od,0), {cls:'calc-row', total: fmt(sumField(computed,'od'),0)})}
+      ${row('Bank Charges (' + fmtPct(pct('BankPct')) + ')', (it,idx)=>fmt(computed[idx].bank,0), {cls:'calc-row', total: fmt(sumField(computed,'bank'),0)})}
+      ${row('Net Profit', (it,idx)=>fmt(computed[idx].net,0), {cls:'net-row', total: fmt(s.net,0)})}
+      ${row('Net Profit %', (it,idx)=>fmtPct(computed[idx].netPct), {cls:'net-row', total: fmtPct(s.netPct)})}
+      ${row('Status', (it,idx)=>`<span class="badge ${computed[idx].status==='Profit'?'profit':'loss'}">${computed[idx].status}</span>`, {cls:'net-row', total: `<span class="badge ${s.status==='Profit'?'profit':'loss'}">${s.status}</span>`})}
+    </tbody>
+  </table>
+  </div>`;
+
+  wrap.innerHTML = modalItems.length ? html : `<div class="empty">No items yet<br><button class="btn-primary" style="margin-top:10px" onclick="addItemRow()">+ Add first item</button></div>`;
+
+  const el = document.getElementById('modalSummary');
+  if(el) el.innerHTML = `
+    <strong>Revenue:</strong> LKR ${fmt(s.revenue,0)} &nbsp; | &nbsp;
+    <strong>Cost:</strong> LKR ${fmt(s.cost,0)} &nbsp; | &nbsp;
+    <strong>Gross Profit:</strong> LKR ${fmt(s.gross,0)} (${fmtPct(s.grossPct)}) &nbsp; | &nbsp;
+    <strong>Net Profit:</strong> LKR ${fmt(s.net,0)} (${fmtPct(s.netPct)})
+  `;
+}
+// header fields that affect the calculation grid re-render the item columns
+document.addEventListener('input', e=>{
+  if(['invRate','invFreight','invCurrency'].includes(e.target.id)) renderItemColumns();
+});
+
+async function saveInvoice(){
+  const isExport = modalType==='export';
+  const invNo = document.getElementById('invNo').value.trim();
+  if(!invNo){ toast('Invoice number is required', true); return; }
+  if(!modalItems.length){ toast('Add at least one item', true); return; }
+
+  let invPayload;
+  if(isExport){
+    invPayload = {
+      InvoiceNo: invNo,
+      Date: document.getElementById('invDate').value,
+      Consignee: document.getElementById('invConsignee').value,
+      Address: document.getElementById('invAddress').value,
+      Country: document.getElementById('invCountry').value,
+      ShipmentMode: document.getElementById('invMode').value,
+      Currency: document.getElementById('invCurrency').value,
+      ExchangeRate: parseFloat(document.getElementById('invRate').value)||1,
+      FreightTotal: parseFloat(document.getElementById('invFreight').value)||0,
+      VatRegNo: document.getElementById('invVat').value
+    };
+  } else {
+    invPayload = {
+      InvoiceNo: invNo,
+      Date: document.getElementById('invDate').value,
+      Customer: document.getElementById('invConsignee').value,
+      DeliveryTotal: parseFloat(document.getElementById('invFreight').value)||0,
+      Notes: document.getElementById('invVat').value
+    };
+  }
+
+  try{
+    const existing = (isExport?DB.exportInvoices:DB.localInvoices).some(i=>i.InvoiceNo===invNo);
+    if(existing){ await apiPost(isExport?'updateExportInvoice':'updateLocalInvoice', invPayload); }
+    else{ await apiPost(isExport?'addExportInvoice':'addLocalInvoice', invPayload); }
+
+    // items: delete old ones for this invoice, then re-add current set (simplest consistent approach)
+    const oldItems = (isExport?DB.exportItems:DB.localItems).filter(i=>i.InvoiceNo===invNo);
+    for(const oi of oldItems){
+      await apiPost(isExport?'deleteExportItem':'deleteLocalItem', {ID:oi.ID});
+    }
+    for(const it of modalItems){
+      const payload = isExport
+        ? {InvoiceNo:invNo, ItemDescription:it.ItemDescription, Size:it.Size||'', Unit:it.Unit||'Pcs', Supplier:it.Supplier||'', Qty:parseFloat(it.Qty)||0, UnitPrice:parseFloat(it.UnitPrice)||0, UnitCostLKR:parseFloat(it.UnitCostLKR)||0}
+        : {InvoiceNo:invNo, ItemDescription:it.ItemDescription, Supplier:it.Supplier||'', Qty:parseFloat(it.Qty)||0, SellPriceLKR:parseFloat(it.SellPriceLKR)||0, UnitCostLKR:parseFloat(it.UnitCostLKR)||0};
+      await apiPost(isExport?'addExportItem':'addLocalItem', payload);
+    }
+    closeModal();
+    if(typeof renderPage === 'function') renderPage();
+    toast('Saved successfully');
+  }catch(e){ toast(e.message, true); }
+}
+
+async function confirmDeleteInvoice(type, invoiceNo){
+  if(!confirm('Delete invoice '+invoiceNo+' and all its items?')) return;
+  try{
+    await apiPost(type==='export'?'deleteExportInvoice':'deleteLocalInvoice', {InvoiceNo:invoiceNo});
+    if(typeof renderPage === 'function') renderPage();
+    toast('Deleted');
+  }catch(e){ toast(e.message, true); }
+}
+
+/* ================= INVOICE PDF / PRINT / EXCEL ================= */
+function buildInvoiceHTML(type, invoiceNo){
+  const isExport = type==='export';
+  const inv = (isExport?DB.exportInvoices:DB.localInvoices).find(i=>i.InvoiceNo===invoiceNo);
+  const s = isExport ? computeExportInvoice(inv) : computeLocalInvoice(inv);
+  const currency = isExport ? (inv.Currency||'USD') : 'LKR';
+
+  const rows = s.items.map((it,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td>${it.ItemDescription||''}</td>
+      <td class="num">${fmt(it.qty,0)}</td>
+      <td class="num">${fmt(it.price,2)}</td>
+      <td class="num">${fmt(it.qty*it.price,2)}</td>
+    </tr>`).join('');
+
+  const total = s.items.reduce((sum,it)=>sum+it.qty*it.price,0);
+
+  return `
+  <div class="inv-doc">
+    <div class="inv-top">
+      <div class="inv-box">
+        <strong>${isExport?'CONSIGNEE':'CUSTOMER'}:</strong><br>
+        ${(isExport?inv.Consignee:inv.Customer)||''}<br>
+        ${isExport?(inv.Address||''):''}
+        ${isExport && inv.VatRegNo? '<br>Vat Reg No: '+inv.VatRegNo:''}
+      </div>
+      <div class="inv-meta">
+        <div class="inv-logo">Bark Ornament</div>
+        <div><strong>Invoice No:</strong> ${inv.InvoiceNo}</div>
+        <div><strong>Date:</strong> ${fmtDate(inv.Date)}</div>
+        ${isExport?`<div><strong>Shipment Mode:</strong> ${inv.ShipmentMode||''}</div>`:''}
+      </div>
+    </div>
+    <h2 class="inv-title">${isExport?'COMMERCIAL INVOICE':'SALES INVOICE'}</h2>
+    <table class="inv-items">
+      <thead><tr><th>#</th><th>Description</th><th class="num">Qty</th><th class="num">Unit Price (${currency})</th><th class="num">Amount (${currency})</th></tr></thead>
+      <tbody>${rows}</tbody>
+      ${isExport && parseFloat(inv.FreightTotal)>0 ? `<tr><td colspan="4" style="text-align:right">Freight Charges (LKR)</td><td class="num">${fmt(inv.FreightTotal,2)}</td></tr>`:''}
+      <tr class="inv-total-row"><td colspan="4" style="text-align:right">TOTAL (${currency})</td><td class="num">${fmt(total,2)}</td></tr>
+    </table>
+    <div class="inv-terms">
+      <strong>Terms &amp; Conditions</strong><br>
+      Payment Mode: 30 days from the date of the invoice.<br><br>
+      Bark Ornament (Pvt) Ltd, No 59A Punsara Watta, Bekkegama, Panadura.
+    </div>
+    <div class="inv-sign">
+      _____________________________<br>
+      Bark Ornament (Private) Limited
+    </div>
+  </div>`;
+}
+
+function downloadInvoicePDF(type, invoiceNo){
+  const html = buildInvoiceHTML(type, invoiceNo);
+  const el = document.getElementById('invoiceTemplate');
+  el.innerHTML = html;
+  el.style.display='block';
+  html2pdf().set({
+    margin:10,
+    filename:`${invoiceNo}.pdf`,
+    image:{type:'jpeg',quality:0.98},
+    html2canvas:{scale:2},
+    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
+  }).from(el.querySelector('.inv-doc')).save().then(()=>{
+    el.style.display='none'; el.innerHTML='';
+  });
+}
+
+function printInvoice(type, invoiceNo){
+  document.getElementById('printArea').innerHTML = buildInvoiceHTML(type, invoiceNo);
+  window.print();
+}
+
+function downloadInvoiceExcel(type, invoiceNo){
+  const isExport = type==='export';
+  const inv = (isExport?DB.exportInvoices:DB.localInvoices).find(i=>i.InvoiceNo===invoiceNo);
+  const s = isExport ? computeExportInvoice(inv) : computeLocalInvoice(inv);
+
+  const data = s.items.map(it=>({
+    'Description': it.ItemDescription,
+    'Supplier': it.Supplier,
+    'Qty': it.qty,
+    'Unit Price': it.price,
+    'Unit Cost (LKR)': it.UnitCostLKR||0,
+    'Revenue (LKR)': Math.round(it.revenue*100)/100,
+    'Total Cost (LKR)': Math.round(it.totalCost*100)/100,
+    'Freight Allocated': Math.round(it.freight*100)/100,
+    'Contribution Profit': Math.round(it.contribution*100)/100,
+    'Gross Profit': Math.round(it.gross*100)/100,
+    'Net Profit': Math.round(it.net*100)/100,
+    'Net Margin %': (it.netPct*100).toFixed(2)+'%',
+    'Status': it.status
+  }));
+  data.push({});
+  data.push({'Description':'TOTAL','Revenue (LKR)':Math.round(s.revenue*100)/100,'Total Cost (LKR)':Math.round(s.cost*100)/100,'Gross Profit':Math.round(s.gross*100)/100,'Net Profit':Math.round(s.net*100)/100,'Net Margin %':(s.netPct*100).toFixed(2)+'%'});
+
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, invoiceNo.slice(0,30));
+  XLSX.writeFile(wb, `${invoiceNo}_profitability.xlsx`);
+}
+
+/* ================= SUPPLIERS ================= */
+function openSupplierModal(s){
+  s = s || {};
+  showModal(`${s.ID?'Edit':'Add'} Supplier`, `
+    <input type="hidden" id="supId" value="${s.ID||''}">
+    <div class="field"><label>Name</label><input id="supName" value="${s.Name||''}"></div>
+    <div class="field"><label>Contact</label><input id="supContact" value="${s.Contact||''}"></div>
+    <div class="field"><label>Notes</label><input id="supNotes" value="${s.Notes||''}"></div>
+  `, [
+    {label:'Cancel', cls:'btn-ghost', onclick:closeModal},
+    {label: s.ID?'Save Changes':'Add Supplier', cls:'btn-primary', onclick: saveSupplier}
+  ]);
+}
+async function saveSupplier(){
+  const id = document.getElementById('supId').value;
+  const payload = {
+    Name: document.getElementById('supName').value.trim(),
+    Contact: document.getElementById('supContact').value.trim(),
+    Notes: document.getElementById('supNotes').value.trim()
+  };
+  if(!payload.Name){ toast('Supplier name is required', true); return; }
+  try{
+    if(id){ payload.ID = id; await apiPost('updateSupplier', payload); }
+    else{ await apiPost('addSupplier', payload); }
+    closeModal();
+    if(typeof renderPage === 'function') renderPage();
+    toast('Supplier saved');
+  }catch(e){ toast(e.message, true); }
+}
+async function deleteSupplier(id){
+  if(!confirm('Delete this supplier?')) return;
+  try{
+    await apiPost('deleteSupplier', {ID:id});
+    if(typeof renderPage === 'function') renderPage();
+    toast('Supplier deleted');
+  }catch(e){ toast(e.message, true); }
+}
+
+/* ================= SETTINGS ================= */
+async function saveSettings(){
+  const payload = {
+    LabourPct: (parseFloat(document.getElementById('setLabour').value)||0)/100,
+    OverheadPct: (parseFloat(document.getElementById('setOverhead').value)||0)/100,
+    CommissionPct: (parseFloat(document.getElementById('setCommission').value)||0)/100,
+    ODPct: (parseFloat(document.getElementById('setOD').value)||0)/100,
+    BankPct: (parseFloat(document.getElementById('setBank').value)||0)/100,
+    DefaultExchangeRate: parseFloat(document.getElementById('setRate').value)||335
+  };
+  try{
+    await apiPost('updateSettings', payload);
+    if(typeof renderPage === 'function') renderPage();
+    toast('Settings saved');
+  }catch(e){ toast(e.message, true); }
+}
+
+</script>
+<script>
+
+function renderPage(){
+  document.getElementById('pageTitle').textContent = 'Dashboard';
+  document.getElementById('pageCrumb').textContent = 'Overview of profitability';
+
+  const exp = DB.exportInvoices.map(inv=>({inv, s:computeExportInvoice(inv)}));
+  const loc = DB.localInvoices.map(inv=>({inv, s:computeLocalInvoice(inv)}));
+
+  const revenue = sumField(exp.map(x=>x.s),'revenue') + sumField(loc.map(x=>x.s),'revenue');
+  const cost = sumField(exp.map(x=>x.s),'cost') + sumField(loc.map(x=>x.s),'cost');
+  const gross = sumField(exp.map(x=>x.s),'gross') + sumField(loc.map(x=>x.s),'gross');
+  const net = sumField(exp.map(x=>x.s),'net') + sumField(loc.map(x=>x.s),'net');
+
+  const expRevenue = sumField(exp.map(x=>x.s),'revenue');
+  const expNet = sumField(exp.map(x=>x.s),'net');
+  const locRevenue = sumField(loc.map(x=>x.s),'revenue');
+  const locNet = sumField(loc.map(x=>x.s),'net');
+
+  const byCountry = {};
+  exp.forEach(({inv,s})=>{
+    const k = inv.Country || 'Unspecified';
+    if(!byCountry[k]) byCountry[k] = {revenue:0,cost:0,gross:0,net:0,count:0};
+    byCountry[k].revenue+=s.revenue; byCountry[k].cost+=s.cost; byCountry[k].gross+=s.gross; byCountry[k].net+=s.net; byCountry[k].count++;
+  });
+
+  const supplierCosts = {};
+  DB.exportItems.concat(DB.localItems).forEach(it=>{
+    const sup = it.Supplier || 'Unassigned';
+    const qty = parseFloat(it.Qty)||0, cost=parseFloat(it.UnitCostLKR)||0;
+    supplierCosts[sup] = (supplierCosts[sup]||0) + qty*cost;
+  });
+  const supplierRows = Object.entries(supplierCosts).sort((a,b)=>b[1]-a[1]).slice(0,8);
+
+  document.getElementById('content').innerHTML = `
+  <div class="cards">
+    <div class="card"><div class="label">Total Turnover (LKR)</div><div class="value">${fmt(revenue,0)}</div></div>
+    <div class="card"><div class="label">Total Cost (LKR)</div><div class="value">${fmt(cost,0)}</div></div>
+    <div class="card"><div class="label">Gross Profit</div><div class="value orange">${fmt(gross,0)}</div><div class="sub">${fmtPct(revenue?gross/revenue:0)} margin</div></div>
+    <div class="card"><div class="label">Net Profit</div><div class="value orange">${fmt(net,0)}</div><div class="sub">${fmtPct(revenue?net/revenue:0)} margin</div></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><h2>Export vs Local</h2></div>
+    <div class="panel-body tbl-wrap">
+      <table class="data">
+        <thead><tr><th>Segment</th><th class="num">Shipments</th><th class="num">Revenue (LKR)</th><th class="num">Net Profit (LKR)</th><th class="num">NP %</th></tr></thead>
+        <tbody>
+          <tr><td>Export</td><td class="num">${exp.length}</td><td class="num">${fmt(expRevenue,0)}</td><td class="num">${fmt(expNet,0)}</td><td class="num">${fmtPct(expRevenue?expNet/expRevenue:0)}</td></tr>
+          <tr><td>Local</td><td class="num">${loc.length}</td><td class="num">${fmt(locRevenue,0)}</td><td class="num">${fmt(locNet,0)}</td><td class="num">${fmtPct(locRevenue?locNet/locRevenue:0)}</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><h2>By Country (Export)</h2></div>
+    <div class="panel-body tbl-wrap">
+      <table class="data">
+        <thead><tr><th>Country</th><th class="num">Shipments</th><th class="num">Revenue (LKR)</th><th class="num">Gross Profit</th><th class="num">Net Profit</th><th class="num">NP %</th></tr></thead>
+        <tbody>
+          ${Object.keys(byCountry).length ? Object.entries(byCountry).map(([k,v])=>`
+            <tr><td>${k}</td><td class="num">${v.count}</td><td class="num">${fmt(v.revenue,0)}</td><td class="num">${fmt(v.gross,0)}</td><td class="num">${fmt(v.net,0)}</td><td class="num">${fmtPct(v.revenue?v.net/v.revenue:0)}</td></tr>
+          `).join('') : `<tr><td colspan="6" class="empty">No export shipments yet</td></tr>`}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><h2>Top Suppliers by Cost (LKR)</h2></div>
+    <div class="panel-body tbl-wrap">
+      <table class="data">
+        <thead><tr><th>Supplier</th><th class="num">Total Cost (LKR)</th></tr></thead>
+        <tbody>
+          ${supplierRows.length? supplierRows.map(([k,v])=>`<tr><td>${k}</td><td class="num">${fmt(v,0)}</td></tr>`).join(''): `<tr><td colspan="2" class="empty">No item cost data yet</td></tr>`}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  `;
+}
+
+
+refreshData(true);
+</script>
+</body>
+</html>
